@@ -48,7 +48,7 @@ public class GestalApiDemo {
             String token = AuthUserPass("user", "pass");
             GetIntegrations(token);
             GetSows("valid_access_key");
-            PostSowMirrors("valid_access_key", "valid_sow_mirror_JSON_object");
+            PostSowMirror("valid_access_key", "valid_sow_mirror_JSON_object");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,6 +64,8 @@ public class GestalApiDemo {
         HttpURLConnection connection = initConnection(url, socketFactory);
 
         connection.setRequestMethod("POST");
+        
+        //"user:password" string must be UTF8 encoded with Base64
         connection.setRequestProperty("Authorization", "Basic "
                 + ByteString.encodeUtf8(user + ":" + pass).base64());
 
@@ -71,12 +73,11 @@ public class GestalApiDemo {
         System.out.println("Code "+responseCode);
 
         if (responseCode >= 200 && responseCode < 300) {
-            String tokenObject = new String(
+            String tokenJsonObject = new String(
                     connection.getInputStream().readAllBytes());
-            System.out.println(tokenObject);
 
             Gson gson = new Gson();
-            token = gson.fromJson(tokenObject, Map.class).get("token").toString();
+            token = gson.fromJson(tokenJsonObject, Map.class).get("token").toString();
         }
         else{
             String error = Okio.buffer(Okio.source(
@@ -92,6 +93,8 @@ public class GestalApiDemo {
         HttpURLConnection connection = initConnection(url, socketFactory);
 
         connection.setRequestMethod("GET");
+        
+        //token must not be encoded
         connection.setRequestProperty("Authorization", "Bearer " + token);
 
         int responseCode = connection.getResponseCode();
@@ -100,6 +103,8 @@ public class GestalApiDemo {
         if (responseCode >= 200 && responseCode < 300) {
             String integrations = Okio.buffer(Okio.source(
                     connection.getInputStream())).readUtf8();
+            
+            //integrations contains an array of integration JSON objects
             System.out.println(integrations);
         }
         else{
@@ -115,6 +120,8 @@ public class GestalApiDemo {
         HttpURLConnection connection = initConnection(url, socketFactory);
 
         connection.setRequestMethod("GET");
+        
+        //access keys strings must be UTF8 encoded with Base64
         connection.setRequestProperty("Authorization", "Basic "
                 + ByteString.encodeUtf8(access_key).base64());
 
@@ -124,6 +131,8 @@ public class GestalApiDemo {
         if (responseCode >= 200 && responseCode < 300) {
             String sows = Okio.buffer(Okio.source(
                     connection.getInputStream())).readUtf8();
+            
+            //sows contains an array of sow JSON objects
             System.out.println(sows);
         }
         else{
@@ -133,7 +142,7 @@ public class GestalApiDemo {
         }
     }
     
-    private void PostSowMirrors(String access_key, String query)
+    private void PostSowMirror(String access_key, String sow_mirror)
             throws MalformedURLException, IOException {
         URL url = new URL("https://api.gestal.cloud/integration/mirrors/sows");
 
@@ -144,13 +153,14 @@ public class GestalApiDemo {
         connection.setRequestProperty("Content-Type", String.format(
                 "application/json;charset=%s", "UTF-8"));
 
+        //access keys strings must be UTF8 encoded with Base64
         connection.setRequestProperty("Authorization", "Basic "
                 + ByteString.encodeUtf8(access_key).base64());
 
         OutputStream output = null;
         try {
             output = connection.getOutputStream();
-            output.write(query.getBytes("UTF-8"));
+            output.write(sow_mirror.getBytes("UTF-8"));
         }
         finally {
             if (output != null) {
@@ -163,8 +173,11 @@ public class GestalApiDemo {
 
         if (responseCode >= 200 && responseCode < 300) 
         {
-            String sows = Okio.buffer(Okio.source(connection.getInputStream())).readUtf8();
-            System.out.println(sows);
+            String created_sow_mirror = Okio.buffer(
+                    Okio.source(connection.getInputStream())).readUtf8();
+            
+            //created_sow_mirror contains the created sow mirror JSON object
+            System.out.println(created_sow_mirror);
         }
         else{
             String error = Okio.buffer(Okio.source(connection.getErrorStream())).readUtf8();
