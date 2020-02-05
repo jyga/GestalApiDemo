@@ -12,3 +12,8 @@ Sample Java application showing how to interface with the Gestal Web API.
 - Link the libraries from the `/lib` folder to the project
 - Build project
 - Run the GestalApiDemo.java class
+
+## Note
+Libraries used are:
+- [GSon](https://github.com/google/gson) for JSON object manipulation
+- [Okio](https://github.com/javadev/okio) for string UTF8 encoding and decoding
