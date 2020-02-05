@@ -48,7 +48,7 @@ public class GestalApiDemo {
             String token = AuthUserPass("user", "pass");
             GetIntegrations(token);
             GetSows("valid_access_key");
-            PostSowsMirror("valid_access_key", "valid_sow_mirror_JSON_object");
+            PostSowMirrors("valid_access_key", "valid_sow_mirror_JSON_object");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -133,7 +133,7 @@ public class GestalApiDemo {
         }
     }
     
-    private void PostSowsMirror(String access_key, String query)
+    private void PostSowMirrors(String access_key, String query)
             throws MalformedURLException, IOException {
         URL url = new URL("https://api.gestal.cloud/integration/mirrors/sows");
 
